@@ -1,0 +1,40 @@
+name: Build OPM
+
+on:
+  release:
+    types: [ published ]
+
+  push:
+    branches: [ master ]
+
+  # allows for manual workflow execution
+  workflow_dispatch:
+
+
+jobs:
+  # this job prepares php sources for packaging
+  build-opm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Calculate package version
+        run: echo "VERSION=$(git describe --tag --abbrev=7 | sed s/-/./g)" >> $GITHUB_ENV
+
+      - name: Fetch opm action
+        uses: actions/checkout@v2
+        with:
+          repository: Freicon/action-opm-build
+          ref: master
+          token: ${{ secrets.PAT_TO_CLONE }}
+          path: .github/actions/action-opm-build
+
+      - name: Build OPM package
+        uses: ./.github/actions/action-opm-build
+        with:
+          name: template-extended
+          version: ${{ env.VERSION }}

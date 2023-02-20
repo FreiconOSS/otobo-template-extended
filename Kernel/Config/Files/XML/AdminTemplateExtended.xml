@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<otobo_config version="2.0" init="Application">
+
+    <Setting  Name="Frontend::Module###AdminTemplateExtended" Required="0" Valid="1">
+        <Description Translatable="1">Frontend module registration for the agent interface.</Description>
+        <Group>TemplateExtended</Group>
+        <Navigation>Frontend::Admin::ModuleRegistration</Navigation>
+        <Value>
+            <Item ValueType="FrontendRegistration">
+                <Hash>
+                    <Item Key="GroupRo">
+                        <Array>
+                        </Array>
+                    </Item>
+                    <Item Key="Group">
+                        <Array>
+                            <Item>admin</Item>
+                        </Array>
+                    </Item>
+
+                    <Item Key="Title" Translatable="1">TemplatesExtended</Item>
+                    <Item Key="NavBarName">Admin</Item>
+                    <Item Key="Description" Translatable="1">Create and manage extended templates.</Item>
+
+                    <!--
+                    <Item Key="Name" Translatable="1">TemplatesExtended</Item>
+                    <Item Key="Block">Queue</Item>
+                    <Item Key="Prio">210</Item>
+                    <Item Key="Module">Kernel::Output::HTML::NavBar::ModuleAdmin</Item>
+                    -->
+                </Hash>
+            </Item>
+        </Value>
+    </Setting>
+
+
+    <Setting Name="Frontend::NavigationModule###AdminTemplateExtended" Required="0" Valid="1">
+        <Description Translatable="1">Admin area navigation for the agent interface.</Description>
+        <Navigation>Frontend::Admin::ModuleRegistration::AdminOverview</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Group">
+                    <Array>
+                        <Item>admin</Item>
+                    </Array>
+                </Item>
+                <Item Key="GroupRo">
+                    <Array>
+                    </Array>
+                </Item>
+                <Item Key="Module">Kernel::Output::HTML::NavBar::ModuleAdmin</Item>
+                <Item Key="Name" Translatable="1">TemplatesExtended</Item>
+                <Item Key="Block">Ticket</Item>
+                <Item Key="Description" Translatable="1">Create and manage extended templates.</Item>
+                <Item Key="IconBig">fa-file-text-o</Item>
+                <Item Key="IconSmall"></Item>
+            </Hash>
+        </Value>
+    </Setting>
+
+
+    <!--ConfigItem Name="StandardTemplate::Types" Required="0" Valid="1">
+        <Description Translatable="1">Defines the list of types for templates.</Description>
+        <Group>TemplateExtended</Group>
+        <SubGroup>Core::Ticket</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="Answer" Translatable="1">Answer</Item>
+                <Item Key="Create" Translatable="1">Create</Item>
+                <Item Key="Forward" Translatable="1">Forward</Item>
+                <Item Key="Email" Translatable="1">Email</Item>
+                <Item Key="PhoneCall" Translatable="1">Phone call</Item>
+                <Item Key="Note" Translatable="1">Note</Item>
+
+                <Item Key="Finish" Translatable="1">Finish</Item>
+                <Item Key="Wait" Translatable="1">Wait</Item>
+                <Item Key="Comment" Translatable="1">Comment</Item>
+                <Item Key="Edit" Translatable="1">Edit</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem-->
+
+    <Setting Name="StandardTemplateExtended::DynamicFields" Required="0" Valid="1">
+        <Description Translatable="1">Whitelist Dynamic Fields that should be shown when creating extended templates.</Description>
+        <Group>TemplateExtended</Group>
+        <SubGroup>Frontend::Admin::StandardTemplateExtended</SubGroup>
+        <Value>
+
+                <Array>
+                    <Item>ITSMImpact</Item>
+                    <Item>ITSMCriticality</Item>
+                    <Item>ITSMReviewRequired</Item>
+                    <Item>ITSMDecisionResult</Item>
+                    <Item>ITSMRepairStartTime</Item>
+                    <Item>ITSMRecoveryStartTime</Item>
+                    <Item>ITSMDecisionDate</Item>
+                    <Item>ITSMDueDate</Item>
+
+                    <!--Item>DispatcherCustomer</Item-->
+                    <!--Item>DispatcherCustomerID</Item-->
+                    <!--Item>Application</Item-->
+                    <!--Item>Activity</Item-->
+                    <!--Item>KindOfReceipt</Item-->
+                </Array>
+
+        </Value>
+    </Setting>
+
+</otobo_config>

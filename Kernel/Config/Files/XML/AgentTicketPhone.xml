@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<otobo_config version="2.0" init="Application">
+    <Setting Name="Ticket::Frontend::AgentTicketPhone###TemplateType" Required="0" Valid="1">
+        <Description Translatable="1">Defines the standard template type for this ticket screen action.</Description>
+        <Group>Ticket</Group>
+        <Navigation>Frontend::Agent::Ticket::ViewPhoneNew</Navigation>
+        <Value>
+            <Item ValueType="String" ValueRegex="">Create</Item>
+        </Value>
+    </Setting>
+    <Setting Name="Ticket::Frontend::AgentTicketPhone###FilterStandardTemplatesBy" Required="0" Valid="1">
+        <Description Translatable="1">Filter StandardTemplates by Queue or AgentUser Roles or do not filter.</Description>
+        <Group>Ticket</Group>
+        <Navigation>Frontend::Agent::Ticket::ViewPhoneNew</Navigation>
+        <Value>
+            <Item ValueType="Select" SelectedID="Queue">
+                <Item ValueType="Option" Value="">none</Item>
+                <Item ValueType="Option" Value="Queue">Queue</Item>
+            </Item>
+        </Value>
+    </Setting>
+    <Setting Name="Ticket::Frontend::AgentTicketPhone###TemplateFieldsBehavior" Required="0" Valid="1">
+        <Description Translatable="1">On selecting a template, if these fields are not defined in its definition, the value will be changed depending on the setting. If the value is defined, it will always be changed.  Possible settings: 0 = Unchanged, 1 = Default (or empty), 2 = Empty</Description>
+        <Group>Ticket</Group>
+        <Navigation>Frontend::Agent::Ticket::ViewPhoneNew</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Subject">1</Item>
+                <Item Key="Dest">1</Item>
+                <!--Item Key="QueueID">0</Item-->
+                <!--Item Key="NewQueueID">1</Item-->
+                <Item Key="PriorityID">1</Item>
+                <!--Item Key="StateID">1</Item-->
+                <Item Key="NextStateID">1</Item>
+                <Item Key="TypeID">1</Item>
+                <Item Key="ServiceID">1</Item>
+                <Item Key="NewUserID">1</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="Ticket::Frontend::AgentTicketPhone###TemplateResetOnDeselect" Required="0" Valid="1">
+        <Description Translatable="1">Reset template fields on deselecting templates.</Description>
+        <Group>Ticket</Group>
+        <Navigation>Frontend::Agent::Ticket::ViewPhoneNew</Navigation>
+        <Value>
+            <Item ValueType="Select" SelectedID="1">
+                <Item ValueType="Option" Value="0">No</Item>
+                <Item ValueType="Option" Value="1">Yes</Item>
+            </Item>
+        </Value>
+    </Setting>
+</otobo_config>

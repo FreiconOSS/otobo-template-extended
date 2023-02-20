@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<otrs_package version="1.1">
+    <Name>TemplateExtended</Name>
+    <Framework>10.0.x</Framework>
+    <Framework>10.1.x</Framework>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Date="2019-11-07 15:00:00" Version="6.0.0">Anpassungen für OTRS 6</ChangeLog>
+    <Description Lang="en">TemplateExtended - Extension package for OTOBO.</Description>
+    <Description Lang="de">TemplateExtended - Erweiterungspaket fuer OTOBO.</Description>
+    <CodeInstall Type="post"><![CDATA[
+        $Kernel::OM->Get('Kernel::System::Log')->Log(Priority => 'notice', Message => "Updating Template Extended.");
+        my @queries = (
+                "CREATE TABLE IF NOT EXISTS standard_template_extended (
+                                    standard_template_id int(11) NOT NULL,
+                                     queue_id int(11) DEFAULT NULL,
+                                    ticket_type_id smallint(6) DEFAULT NULL,
+                                    service_id int(11) DEFAULT NULL,
+                                    sla_id int(11) DEFAULT NULL,
+                                    user_id int(11) DEFAULT NULL,
+                                    subject varchar(255) DEFAULT NULL,
+                                    ticket_state_id smallint(6) DEFAULT NULL,
+                                    ticket_priority_id smallint(6) DEFAULT NULL,
+                                    responsible_user_id int(11) DEFAULT NULL,
+                                    time_accounting decimal(10,2) DEFAULT NULL,
+                                    process_entity_id varchar(255) DEFAULT NULL,
+                                    required_group int(11) DEFAULT NULL,
+                                    PRIMARY KEY (standard_template_id)
+                                ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
+                "ALTER TABLE standard_template_extended ADD CONSTRAINT standard_template_extended_ibfk_1 FOREIGN KEY (standard_template_id) REFERENCES standard_template (id) ON DELETE CASCADE",
+                "CREATE TABLE IF NOT EXISTS standard_template_extended_dynamic_fields (
+                                    id int(11) NOT NULL AUTO_INCREMENT,
+                                    dynamic_field_id int(11) NOT NULL,
+                                    standard_template_id int(11) NOT NULL,
+                                    value_text text,
+                                    value_date datetime DEFAULT NULL,
+                                    value_int bigint(20) DEFAULT NULL,
+                                    PRIMARY KEY (id),
+                                    KEY dynamic_field_value_field_values (standard_template_id),
+                                    KEY dynamic_field_value_search_date (dynamic_field_id,value_date),
+                                    KEY dynamic_field_value_search_int (dynamic_field_id,value_int)
+                                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0",
+                "
+                   ALTER TABLE standard_template_extended_dynamic_fields
+                                    ADD CONSTRAINT standard_template_extended_dynamic_fields_ibfk_4 FOREIGN KEY (dynamic_field_id) REFERENCES dynamic_field (id) ON DELETE CASCADE ,
+                                    ADD CONSTRAINT standard_template_extended_dynamic_fields_ibfk_1 FOREIGN KEY (standard_template_id) REFERENCES standard_template (id) ON DELETE CASCADE ,
+                                    ADD CONSTRAINT standard_template_extended_dynamic_fields_ibfk_2 FOREIGN KEY (dynamic_field_id) REFERENCES dynamic_field (id) ON DELETE CASCADE ,
+                                    ADD CONSTRAINT standard_template_extended_dynamic_fields_ibfk_3 FOREIGN KEY (standard_template_id) REFERENCES standard_template (id) ON DELETE CASCADE ",
+        );
+
+        foreach my $q (@queries) {
+            if ($Kernel::OM->Get('Kernel::System::DB')->Do(SQL => $q)) {
+                next;
+            }
+            my $Error = $Kernel::OM->Get('Kernel::System::DB')->Error();
+            if ($Error) {
+                $Kernel::OM->Get('Kernel::System::Log')->Log(Priority => 'error', Message => 'DB Error: "' . $Error . '".');
+            }
+            else {
+                $Kernel::OM->Get('Kernel::System::Log')->Log(Priority => 'notice', Message => 'No error and no ok on = "' . $q . '"');
+            }
+        }
+        ]]></CodeInstall>
+    <DatabaseUpgrade Type="post">
+        <TableAlter Name="standard_template_extended" Version="10.0.0">
+            <ColumnAdd Name="required_group" Required="false" Type="INTEGER" />
+        </TableAlter>
+    </DatabaseUpgrade>
+    <CodeUninstall Type="pre"><![CDATA[
+        my $CodeModule = 'var::packagesetup::' . $Param{Structure}->{Name}->{Content};
+        $Kernel::OM->Get($CodeModule)->CodeUninstall();
+    ]]></CodeUninstall>
+    <CodeReinstall Type="post"><![CDATA[
+        my $CodeModule = 'var::packagesetup::' . $Param{Structure}->{Name}->{Content};
+        $Kernel::OM->Get($CodeModule)->CodeReinstall();
+    ]]></CodeReinstall>
+</otrs_package>
