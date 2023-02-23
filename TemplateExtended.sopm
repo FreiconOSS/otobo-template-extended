@@ -3,8 +3,8 @@
     <Name>TemplateExtended</Name>
     <Framework>10.0.x</Framework>
     <Framework>10.1.x</Framework>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
     <ChangeLog Date="2019-11-07 15:00:00" Version="6.0.0">Anpassungen für OTRS 6</ChangeLog>
-    <ChangeLog Date="2022-07-23 18:00:00" Version="10.1.1">Gruppenauswahl angepasst</ChangeLog>
     <Description Lang="en">TemplateExtended - Extension package for OTOBO.</Description>
     <Description Lang="de">TemplateExtended - Erweiterungspaket fuer OTOBO.</Description>
     <CodeInstall Type="post"><![CDATA[
@@ -61,9 +61,8 @@
         }
         ]]></CodeInstall>
     <DatabaseUpgrade Type="post">
-        <TableAlter Type="post" Name="standard_template_extended" Version="10.0.0">
-            <ColumnAdd Name="required_group" Required="false" Type="VARCHAR"></ColumnAdd>
-            <ColumnChange Name="required_group" Required="false" Type="VARCHAR"></ColumnChange>
+        <TableAlter Name="standard_template_extended" Version="10.0.0">
+            <ColumnAdd Name="required_group" Required="false" Type="INTEGER" />
         </TableAlter>
     </DatabaseUpgrade>
     <CodeUninstall Type="pre"><![CDATA[

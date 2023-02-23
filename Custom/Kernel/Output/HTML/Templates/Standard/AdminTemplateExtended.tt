@@ -152,7 +152,7 @@
                 [% END %]
             </div>
             <div class="Content">
-                <form action="[% Env("CGIHandle") %]" method="post" id="TemplateExtended" class="Validate PreventMultipleSubmits">
+                <form action="[% Env("CGIHandle") %]" method="post" class="Validate PreventMultipleSubmits">
                 <input type="hidden" name="Action" value="[% Env("Action") %]"/>
                 <input type="hidden" name="Subaction" value="[% Data.Action | uri %]Action"/>
                 <input type="hidden" name="ID" value="[% Data.ID | html %]"/>
@@ -188,17 +188,9 @@
                     </div>
                     <div class="Clear"></div>
 
-                    <label class="Mandatory" for="RequiredGroup"><span class="Marker">*</span> [% Translate("RequiredGroup") | html %]:</label>
+                    <label for="RequiredGroup">[% Translate("RequiredGroup") | html %]:</label>
                     <div class="Field">
                         [% Data.RequiredGroupString %]
-                            <div id="RequiredGroupError" class="TooltipErrorMessage">
-                                <p>[% Translate("This field is required.") | html %]</p>
-                            </div>
-                            <div id="RequiredGroupServerError" class="TooltipErrorMessage">
-                            [% RenderBlockStart("RequiredGroupServerError") %]
-                                <p>[% Translate("This field is required.") | html %]</p>
-                            [% RenderBlockEnd("RequiredGroupServerError") %]
-                            </div>
                     </div>
                     <div class="Clear"></div>
 ## FREICON:
