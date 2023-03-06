@@ -51,6 +51,7 @@ Core.Agent.EnhancedTemplates = (function (TargetNS) {
 
             // Remove the AJAXAction input field so that future ajax calls will be made to the original action again
             $('#AJAXAction').remove();
+            $('#OrigAction').remove();
         });
     };
 
