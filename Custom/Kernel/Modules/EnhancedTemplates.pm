@@ -26,17 +26,17 @@ use Kernel::System::VariableCheck qw(:all);
 use Data::Dumper;
 
 sub new {
-    my ( $Type, %Param ) = @_;
+    my ($Type, %Param) = @_;
 
     # allocate new hash for object
-    my $Self = {%Param};
-    bless( $Self, $Type );
+    my $Self = { %Param };
+    bless($Self, $Type);
 
     return $Self;
 }
 
 sub Run {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
     my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
@@ -44,13 +44,15 @@ sub Run {
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
     my $StandardTemplateObject = $Kernel::OM->Get('Kernel::System::StandardTemplateExtended');
 
-    if ( $Self->{Subaction} eq 'AJAXUpdate' ) {
+    if ($Self->{Subaction} eq 'AJAXUpdate') {
 
-        my $EnhancedTemplateID = $ParamObject->GetParam( Param => 'EnhancedTemplateID' ) || '';
-        my $CustomerUser   = $ParamObject->GetParam( Param => 'SelectedCustomerUser' ) || "";
-        my $FormID   = $ParamObject->GetParam( Param => 'FormID' ) || "";
-        my $OrigAction   = $ParamObject->GetParam( Param => 'OrigAction' ) || "";
+        my $EnhancedTemplateID = $ParamObject->GetParam(Param => 'EnhancedTemplateID') || '';
+        my $CustomerUser = $ParamObject->GetParam(Param => 'SelectedCustomerUser') || "";
+        my $FormID = $ParamObject->GetParam(Param => 'FormID') || "";
+        my $OrigAction = $ParamObject->GetParam(Param => 'OrigAction') || "";
         my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
+
+        $EnhancedTemplateID = '3';
 
         unless (defined $EnhancedTemplateID) {
             ReturnEmptyResponse();
@@ -75,17 +77,17 @@ sub Run {
         );
 
         my %States = $FieldRestrictionsObject->GetFieldStates(
-            TicketObject        => $TicketObject,
-            DynamicFields       => $Self->{DynamicField},
+            TicketObject              => $TicketObject,
+            DynamicFields             => $Self->{DynamicField},
             DynamicFieldBackendObject => $DynamicFieldBackendObject,
-            ChangedElements     => {},
-            CustomerUser        => $CustomerUser,
-            Action              => $OrigAction,
-            UserID              => $Self->{UserID},
-            TicketID            => $Self->{TicketID},
-            FormID              => $FormID,
-            GetParam            => {%GetParam},
-            LoopProtection      => \$LoopProtection,
+            ChangedElements           => {},
+            CustomerUser              => $CustomerUser,
+            Action                    => $OrigAction,
+            UserID                    => $Self->{UserID},
+            TicketID                  => $Self->{TicketID},
+            FormID                    => $FormID,
+            GetParam                  => { %GetParam },
+            LoopProtection            => \$LoopProtection,
         );
 
         # update ticket body and attachements if needed.
@@ -97,7 +99,7 @@ sub Run {
             FormID => $FormID,
         );
 
-        if ( !$RemoveSuccess ) {
+        if (!$RemoveSuccess) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
                 Message  => "Form attachments could not be deleted!",
@@ -105,7 +107,7 @@ sub Run {
         }
 
         # get the template text and set new attachments if a template is selected
-        if ( IsPositiveInteger( $EnhancedTemplateID ) ) {
+        if (IsPositiveInteger($EnhancedTemplateID)) {
             my $TemplateGenerator = $Kernel::OM->Get('Kernel::System::TemplateGenerator');
 
             # set template text, replace smart tags (limited as ticket is not created)
@@ -122,8 +124,8 @@ sub Run {
             my %AllStdAttachments = $StdAttachmentObject->StdAttachmentStandardTemplateMemberList(
                 StandardTemplateID => $EnhancedTemplateID,
             );
-            for ( sort keys %AllStdAttachments ) {
-                my %AttachmentsData = $StdAttachmentObject->StdAttachmentGet( ID => $_ );
+            for (sort keys %AllStdAttachments) {
+                my %AttachmentsData = $StdAttachmentObject->StdAttachmentGet(ID => $_);
                 $UploadCacheObject->FormIDAddFile(
                     FormID      => $FormID,
                     Disposition => 'attachment',
@@ -146,9 +148,29 @@ sub Run {
 
         # get list type
         my $TreeView = 0;
-        if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
+
+        # my $TreeConfig = $ConfigObject->Get('Ticket::Frontend::ListType');
+
+        if ($ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree') {
             $TreeView = 1;
         }
+
+        my %Attributes = (
+            Dest      => {
+                Translation  => 0,
+                PossibleNone => 1,
+                TreeView     => $TreeView,
+                Max          => 100, },
+            ServiceID => {
+                PossibleNone => 1,
+                Translation  => 0,
+                TreeView     => $TreeView,
+                Max          => 100, },
+            TypeID    => {
+                PossibleNone => 1,
+                Translation  => 0,
+                Max          => 100, }
+        );
 
         @TemplateAJAX = (
             {
@@ -170,114 +192,127 @@ sub Run {
             },
         );
 
-
-        if ( $StandardTemplate{Service} ) {
+        if ($StandardTemplate{Service}) {
             my $Services = $Self->_GetServices(
                 CustomerUserID => '',
-                QueueID        => 1,
+                QueueID        => $StandardTemplate{Queue},
             );
 
             push @TemplateAJAX, {
-                'Data' => $Services,
+                'Data'       => $Services,
                 'SelectedID' => $StandardTemplate{Service},
-                'Name' => 'ServiceID',
+                'Name'       => 'ServiceID',
+                'Translation'  => 0,
+                'PossibleNone' => 1,
+                'TreeView'     => 1,
+                'Max'          => 100,
             };
         }
 
-        if ( $StandardTemplate{TicketType} ) {
+        if ($StandardTemplate{TicketType}) {
             my $TicketTypes = $Self->_GetTypes(
                 CustomerUserID => '',
-                QueueID        => 1,
+                QueueID        => $StandardTemplate{Queue},
             );
 
             push @TemplateAJAX, {
-                'Data' => $TicketTypes,
-                'SelectedID' => $StandardTemplate{TicketType},
-                'Name' => 'TypeID',
+                'Data'         => $TicketTypes,
+                'SelectedID'   => $StandardTemplate{TicketType},
+                'Name'         => 'TypeID',
+                'TreeView'     => 1,
+                'PossibleNone' => 1
             };
         }
 
-        if ( $StandardTemplate{Queue} ) {
+        if ($StandardTemplate{Queue}) {
             my $QueueObject = $Kernel::OM->Get('Kernel::System::Queue');
             #my %Queues = $QueueObject->QueueList( Valid => 1 );
             my $Queues = $Self->_GetTos();
             my %QueueHash = %{$Queues};
             my %NewQueueHash;
-            for my $QueueItem ( keys %QueueHash ) {
+            for my $QueueItem (keys %QueueHash) {
                 $NewQueueHash{"$QueueItem||$QueueHash{$QueueItem}"} = $QueueHash{$QueueItem};
             }
 
             push @TemplateAJAX, {
-                'Data' => \%NewQueueHash,
+                'Data'       => \%NewQueueHash,
                 'SelectedID' => "$StandardTemplate{Queue}||$QueueHash{$StandardTemplate{Queue}}",
-                'Name' => 'Dest',
+                'Name'       => 'Dest',
+                'Translation'  => 0,
+                'PossibleNone' => 1,
+                'TreeView'     => 1,
+                'Max'          => 100,
             };
             push @TemplateAJAX, {
-                'Data' => \%NewQueueHash,
+                'Data'       => \%NewQueueHash,
                 'SelectedID' => "$StandardTemplate{Queue}||$QueueHash{$StandardTemplate{Queue}}",
-                'Name' => 'QueueID',
+                'Name'       => 'QueueID',
+                'Translation'  => 0,
+                'PossibleNone' => 1,
+                'TreeView'     => 1,
+                'Max'          => 100,
             };
         }
 
-        if ( $StandardTemplate{Owner} ) {
+        if ($StandardTemplate{Owner}) {
             my $NewUsers = $Self->_GetUsers(
-                QueueID => $StandardTemplate{Queue},
+                QueueID  => $StandardTemplate{Queue},
                 OwnerAll => 1
             );
 
             push @TemplateAJAX, {
-                'Data' => $NewUsers,
+                'Data'       => $NewUsers,
                 'SelectedID' => $StandardTemplate{Owner},
-                'Name' => 'NewUserID',
+                'Name'       => 'NewUserID',
             };
         }
 
-        if ( $StandardTemplate{Priority} ) {
+        if ($StandardTemplate{Priority}) {
             my $Priorities = $Self->_GetPriorities(
                 QueueID => $StandardTemplate{Queue},
             );
 
             push @TemplateAJAX, {
-                'Data' => $Priorities,
+                'Data'       => $Priorities,
                 'SelectedID' => $StandardTemplate{Priority},
-                'Name' => 'PriorityID',
+                'Name'       => 'PriorityID',
             };
         }
 
-        if ( $StandardTemplate{NextState} ) {
+        if ($StandardTemplate{NextState}) {
             my $NextStates = $Self->_GetNextStates();
 
             push @TemplateAJAX, {
-                'Data' => $NextStates,
+                'Data'       => $NextStates,
                 'SelectedID' => $StandardTemplate{NextState},
-                'Name' => 'NextStateID',
+                'Name'       => 'NextStateID',
             };
         }
 
-        for my $DynamicField ( @{$Self->{DynamicField}} ) {
-            next if ( $DynamicField->{FieldType} eq "Database");
+        for my $DynamicField (@{$Self->{DynamicField}}) {
+            next if ($DynamicField->{FieldType} eq "Database");
             my $PossibleValues = $DynamicField->{Config}->{PossibleValues};
-            if ( $DynamicField->{FieldType} eq "FreiconWebServiceSingle") {
+            if ($DynamicField->{FieldType} eq "FreiconWebServiceSingle") {
                 $PossibleValues = $DynamicFieldBackendObject->PossibleValuesGet(
                     DynamicFieldConfig   => $DynamicField,
                     OverridePossibleNone => 0,
                     Service              => $StandardTemplate{Service}
                 );
-                next if ( $PossibleValues->{"FieldLabel_1"});
+                next if ($PossibleValues->{"FieldLabel_1"});
             }
 
             next unless $PossibleValues;
             push @TemplateAJAX, {
-                'Data' => $PossibleValues,
+                'Data'       => $PossibleValues,
                 'SelectedID' => $StandardTemplate{"DynamicField_$DynamicField->{Name}"},
-                'Name' => "DynamicField_" . $DynamicField->{Name},
+                'Name'       => "DynamicField_" . $DynamicField->{Name},
             };
         }
 
         my $JSON = $LayoutObject->BuildSelectionJSON(
             [
-                #@StdFieldAJAX,
-                #@DynamicFieldAJAX,
+                #@StdFieldAJAX                    ,
+                #@DynamicFieldAJAX    ,
                 @TemplateAJAX,
             ],
         );
@@ -304,7 +339,7 @@ sub Run {
 }
 
 sub ReturnEmptyResponse {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
@@ -322,13 +357,13 @@ sub ReturnEmptyResponse {
 
 
 sub _GetNextStates {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # use default Queue if none is provided
     $Param{QueueID} = $Param{QueueID} || 1;
 
     my %NextStates = ();
-    if ( $Param{QueueID} || $Param{TicketID} ) {
+    if ($Param{QueueID} || $Param{TicketID}) {
         %NextStates = $Kernel::OM->Get('Kernel::System::Ticket')->TicketStateList(
             %Param,
             Action => "AgentTicketPhone",
@@ -339,7 +374,7 @@ sub _GetNextStates {
 }
 
 sub _GetUsers {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # get users
     my %ShownUsers;
@@ -352,35 +387,35 @@ sub _GetUsers {
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
     # just show only users with selected custom queue
-    if ( $Param{QueueID} && !$Param{OwnerAll} ) {
+    if ($Param{QueueID} && !$Param{OwnerAll}) {
         my @UserIDs = $TicketObject->GetSubscribedUserIDsByQueueID(%Param);
-        for my $KeyGroupMember ( sort keys %AllGroupsMembers ) {
+        for my $KeyGroupMember (sort keys %AllGroupsMembers) {
             my $Hit = 0;
             for my $UID (@UserIDs) {
-                if ( $UID eq $KeyGroupMember ) {
+                if ($UID eq $KeyGroupMember) {
                     $Hit = 1;
                 }
             }
-            if ( !$Hit ) {
+            if (!$Hit) {
                 delete $AllGroupsMembers{$KeyGroupMember};
             }
         }
     }
 
     # show all system users
-    if ( $Kernel::OM->Get('Kernel::Config')->Get('Ticket::ChangeOwnerToEveryone') ) {
+    if ($Kernel::OM->Get('Kernel::Config')->Get('Ticket::ChangeOwnerToEveryone')) {
         %ShownUsers = %AllGroupsMembers;
     }
 
     # show all users who are owner or rw in the queue group
-    elsif ( $Param{QueueID} ) {
-        my $GID        = $Kernel::OM->Get('Kernel::System::Queue')->GetQueueGroupID( QueueID => $Param{QueueID} );
+    elsif ($Param{QueueID}) {
+        my $GID = $Kernel::OM->Get('Kernel::System::Queue')->GetQueueGroupID(QueueID => $Param{QueueID});
         my %MemberList = $Kernel::OM->Get('Kernel::System::Group')->PermissionGroupGet(
             GroupID => $GID,
             Type    => 'owner',
         );
-        for my $KeyMember ( sort keys %MemberList ) {
-            if ( $AllGroupsMembers{$KeyMember} ) {
+        for my $KeyMember (sort keys %MemberList) {
+            if ($AllGroupsMembers{$KeyMember}) {
                 $ShownUsers{$KeyMember} = $AllGroupsMembers{$KeyMember};
             }
         }
@@ -402,7 +437,7 @@ sub _GetUsers {
 }
 
 sub _GetResponsibles {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # get users
     my %ShownUsers;
@@ -415,35 +450,35 @@ sub _GetResponsibles {
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
     # just show only users with selected custom queue
-    if ( $Param{QueueID} && !$Param{ResponsibleAll} ) {
+    if ($Param{QueueID} && !$Param{ResponsibleAll}) {
         my @UserIDs = $TicketObject->GetSubscribedUserIDsByQueueID(%Param);
-        for my $KeyGroupMember ( sort keys %AllGroupsMembers ) {
+        for my $KeyGroupMember (sort keys %AllGroupsMembers) {
             my $Hit = 0;
             for my $UID (@UserIDs) {
-                if ( $UID eq $KeyGroupMember ) {
+                if ($UID eq $KeyGroupMember) {
                     $Hit = 1;
                 }
             }
-            if ( !$Hit ) {
+            if (!$Hit) {
                 delete $AllGroupsMembers{$KeyGroupMember};
             }
         }
     }
 
     # show all system users
-    if ( $Kernel::OM->Get('Kernel::Config')->Get('Ticket::ChangeOwnerToEveryone') ) {
+    if ($Kernel::OM->Get('Kernel::Config')->Get('Ticket::ChangeOwnerToEveryone')) {
         %ShownUsers = %AllGroupsMembers;
     }
 
     # show all users who are responsible or rw in the queue group
-    elsif ( $Param{QueueID} ) {
-        my $GID        = $Kernel::OM->Get('Kernel::System::Queue')->GetQueueGroupID( QueueID => $Param{QueueID} );
+    elsif ($Param{QueueID}) {
+        my $GID = $Kernel::OM->Get('Kernel::System::Queue')->GetQueueGroupID(QueueID => $Param{QueueID});
         my %MemberList = $Kernel::OM->Get('Kernel::System::Group')->PermissionGroupGet(
             GroupID => $GID,
             Type    => 'responsible',
         );
-        for my $KeyMember ( sort keys %MemberList ) {
-            if ( $AllGroupsMembers{$KeyMember} ) {
+        for my $KeyMember (sort keys %MemberList) {
+            if ($AllGroupsMembers{$KeyMember}) {
                 $ShownUsers{$KeyMember} = $AllGroupsMembers{$KeyMember};
             }
         }
@@ -465,14 +500,14 @@ sub _GetResponsibles {
 }
 
 sub _GetPriorities {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # use default Queue if none is provided
     $Param{QueueID} = $Param{QueueID} || 1;
 
     # get priority
     my %Priorities;
-    if ( $Param{QueueID} || $Param{TicketID} ) {
+    if ($Param{QueueID} || $Param{TicketID}) {
         %Priorities = $Kernel::OM->Get('Kernel::System::Ticket')->TicketPriorityList(
             %Param,
             Action => $Self->{Action},
@@ -483,14 +518,14 @@ sub _GetPriorities {
 }
 
 sub _GetTypes {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # use default Queue if none is provided
     $Param{QueueID} = $Param{QueueID} || 1;
 
     # get type
     my %Type;
-    if ( $Param{QueueID} || $Param{TicketID} ) {
+    if ($Param{QueueID} || $Param{TicketID}) {
         %Type = $Kernel::OM->Get('Kernel::System::Ticket')->TicketTypeList(
             %Param,
             Action => $Self->{Action},
@@ -501,13 +536,15 @@ sub _GetTypes {
 }
 
 sub _GetServices {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # get service
     my %Service;
 
+    my $ServiceObject = $Kernel::OM->Get('Kernel::System::Service');
+
     # use default Queue if none is provided
-    $Param{QueueID} = $Param{QueueID} || 1;
+    $Param{QueueID} = $Param{QueueID} || '';
 
     # get options for default services for unknown customers
     my $DefaultServiceUnknownCustomer = $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Service::Default::UnknownCustomer');
@@ -515,36 +552,42 @@ sub _GetServices {
     # check if no CustomerUserID is selected
     # if $DefaultServiceUnknownCustomer = 0 leave CustomerUserID empty, it will not get any services
     # if $DefaultServiceUnknownCustomer = 1 set CustomerUserID to get default services
-    if ( !$Param{CustomerUserID} && $DefaultServiceUnknownCustomer ) {
+    if (!$Param{CustomerUserID} && $DefaultServiceUnknownCustomer) {
         $Param{CustomerUserID} = '<DEFAULT>';
     }
 
     # get service list
-    if ( $Param{CustomerUserID} ) {
+    if ($Param{CustomerUserID} && $Param{QueueID}) {
         %Service = $Kernel::OM->Get('Kernel::System::Ticket')->TicketServiceList(
             %Param,
             Action => $Self->{Action},
             UserID => $Self->{UserID},
+        );
+    } else {
+        # Return all Services, filtering by KeepChildren config .
+        %Service = $ServiceObject->ServiceList(
+            UserID       => $Self->{UserID},
+            KeepChildren => $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Service::KeepChildren'),
         );
     }
     return \%Service;
 }
 
 sub _GetSLAs {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # use default Queue if none is provided
     $Param{QueueID} = $Param{QueueID} || 1;
 
     # get services if they were not determined in an AJAX call
-    if ( !defined $Param{Services} ) {
+    if (!defined $Param{Services}) {
         $Param{Services} = $Self->_GetServices(%Param);
     }
 
     # get sla
     my %SLA;
-    if ( $Param{ServiceID} && $Param{Services} && %{ $Param{Services} } ) {
-        if ( $Param{Services}->{ $Param{ServiceID} } ) {
+    if ($Param{ServiceID} && $Param{Services} && %{$Param{Services}}) {
+        if ($Param{Services}->{ $Param{ServiceID} }) {
             %SLA = $Kernel::OM->Get('Kernel::System::Ticket')->TicketSLAList(
                 %Param,
                 Action => $Self->{Action},
@@ -556,21 +599,20 @@ sub _GetSLAs {
 }
 
 sub _GetTos {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     # get config object
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # check own selection
     my %NewTos;
-    if ( $ConfigObject->Get('Ticket::Frontend::NewQueueOwnSelection') ) {
-        %NewTos = %{ $ConfigObject->Get('Ticket::Frontend::NewQueueOwnSelection') };
-    }
-    else {
+    if ($ConfigObject->Get('Ticket::Frontend::NewQueueOwnSelection')) {
+        %NewTos = %{$ConfigObject->Get('Ticket::Frontend::NewQueueOwnSelection')};
+    } else {
 
         # SelectionType Queue or SystemAddress?
         my %Tos;
-        if ( $ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') eq 'Queue' ) {
+        if ($ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') eq 'Queue') {
             %Tos = $Kernel::OM->Get('Kernel::System::Ticket')->MoveList(
                 %Param,
                 Type    => 'create',
@@ -578,8 +620,7 @@ sub _GetTos {
                 QueueID => $Self->{QueueID},
                 UserID  => $Self->{UserID},
             );
-        }
-        else {
+        } else {
             %Tos = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressQueueList();
         }
 
@@ -590,13 +631,13 @@ sub _GetTos {
         );
 
         my $SystemAddressObject = $Kernel::OM->Get('Kernel::System::SystemAddress');
-        my $QueueObject         = $Kernel::OM->Get('Kernel::System::Queue');
+        my $QueueObject = $Kernel::OM->Get('Kernel::System::Queue');
 
         # build selection string
         QUEUEID:
-        for my $QueueID ( sort keys %Tos ) {
+        for my $QueueID (sort keys %Tos) {
 
-            my %QueueData = $QueueObject->QueueGet( ID => $QueueID );
+            my %QueueData = $QueueObject->QueueGet(ID => $QueueID);
 
             # permission check, can we create new tickets in queue
             next QUEUEID if !$UserGroups{ $QueueData{GroupID} };
@@ -607,11 +648,11 @@ sub _GetTos {
             $String =~ s/<QueueComment>/$QueueData{Comment}/g;
 
             # remove trailing spaces
-            if ( !$QueueData{Comment} ) {
+            if (!$QueueData{Comment}) {
                 $String =~ s{\s+\z}{};
             }
 
-            if ( $ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') ne 'Queue' ) {
+            if ($ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') ne 'Queue') {
                 my %SystemAddressData = $SystemAddressObject->SystemAddressGet(
                     ID => $Tos{$QueueID},
                 );
@@ -629,12 +670,12 @@ sub _GetTos {
 }
 
 sub _GetTimeUnits {
-    my ( $Self, %Param ) = @_;
+    my ($Self, %Param) = @_;
 
     my $AccountedTime = '';
 
     # Get accounted time if AccountTime config item is enabled.
-    if ( $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Frontend::AccountTime') && defined $Param{ArticleID} ) {
+    if ($Kernel::OM->Get('Kernel::Config')->Get('Ticket::Frontend::AccountTime') && defined $Param{ArticleID}) {
         $AccountedTime = $Kernel::OM->Get('Kernel::System::Ticket::Article')->ArticleAccountedTimeGet(
             ArticleID => $Param{ArticleID},
         );

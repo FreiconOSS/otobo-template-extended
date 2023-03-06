@@ -47,6 +47,8 @@ Core.Agent.EnhancedTemplates = (function (TargetNS) {
             $('#NewPhoneTicket').append('<input type="hidden"  id="AJAXAction" name="AJAXAction" value="EnhancedTemplates" />');
             Core.AJAX.FormUpdate($('#NewPhoneTicket'), 'AJAXUpdate', 'EnhancedTemplateID', ['RichTextField']);
 
+            Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
+
             // Remove the AJAXAction input field so that future ajax calls will be made to the original action again
             $('#AJAXAction').remove();
         });
