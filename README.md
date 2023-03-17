@@ -1,4 +1,4 @@
-# OTRS6 - TemplateExtended6
+# Template Extended für OTOBO 10.1
 
 ## Installation:
 
@@ -6,17 +6,17 @@ Nach der Installation der _OPM_-Datei über den _Packagemanager_ müssen noch fo
 
 ### angepasstes _OTRS_
 ```
-cd /opt/otrs/Custom/Kernel/Modules/
+cd /opt/otobo/Custom/Kernel/Modules/
 patch AgentTicketPhone.pm AgentTicketPhoneTemplateExtended.pm.diff
 
-cd /opt/otrs/Custom/Kernel/Output/HTML/Templates/Standard/
+cd /opt/otobo/Custom/Kernel/Output/HTML/Templates/Standard/
 patch AgentTicketPhone.tt AgentTicketPhoneTemplateExtended.tt.diff
 ```
 ### unberührtes _OTRS_
 ```
-cd /opt/otrs/Custom/Kernel/Modules/
+cd /opt/otobo/Custom/Kernel/Modules/
 cp AgentTicketPhoneTemplateExtended.pm AgentTicketPhone.pm
-cd /opt/otrs/Custom/Kernel/Output/HTML/Templates/Standard/
+cd /opt/otobo/Custom/Kernel/Output/HTML/Templates/Standard/
 cp AgentTicketPhoneTemplateExtended.tt AgentTicketPhone.tt
 ```
 ## Systemkonfiguration
