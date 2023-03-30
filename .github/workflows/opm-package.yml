@@ -23,12 +23,14 @@ jobs:
           fetch-depth: 0
 
       - name: Calculate package version
-        run: echo "VERSION=$(git describe --tag --abbrev=7 | sed s/-/./g)" >> $GITHUB_ENV
+        run: |
+          echo "VERSION=$(git describe --tag --abbrev=7 | sed s/-/./g)" >> $GITHUB_ENV
+          echo "NAME=template-extended" >> $GITHUB_ENV
 
       - name: Build OPM package
         uses: freiconoss/action-opm-build@v1
         with:
-          name: template-extended
+          name: ${{ env.NAME }}
           version: ${{ env.VERSION }}
 
       - name: Upload Artifact
