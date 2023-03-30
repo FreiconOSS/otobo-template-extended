@@ -33,10 +33,6 @@ jobs:
           name: ${{ env.NAME }}
           version: ${{ env.VERSION }}
 
-      - name: lsl
-        run: |
-          ls -lh
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
