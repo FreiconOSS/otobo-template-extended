@@ -26,7 +26,7 @@ jobs:
         run: echo "VERSION=$(git describe --tag --abbrev=7 | sed s/-/./g)" >> $GITHUB_ENV
 
       - name: Build OPM package
-        uses: freiconoss/action-opm-build@0.0.2
+        uses: freiconoss/action-opm-build@v1
         with:
           name: template-extended
           version: ${{ env.VERSION }}
