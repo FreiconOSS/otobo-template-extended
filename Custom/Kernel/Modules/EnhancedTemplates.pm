@@ -555,19 +555,19 @@ sub _GetServices {
     }
 
     # get service list
-    if ($Param{CustomerUserID} && $Param{QueueID}) {
-        %Service = $Kernel::OM->Get('Kernel::System::Ticket')->TicketServiceList(
-            %Param,
-            Action => $Self->{Action},
-            UserID => $Self->{UserID},
-        );
-    } else {
-        # Return all Services, filtering by KeepChildren config .
-        %Service = $ServiceObject->ServiceList(
-            UserID       => $Self->{UserID},
-            KeepChildren => $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Service::KeepChildren'),
-        );
-    }
+    # if ($Param{CustomerUserID} && $Param{QueueID}) {
+    #     %Service = $Kernel::OM->Get('Kernel::System::Ticket')->TicketServiceList(
+    #         %Param,
+    #         Action => $Self->{Action},
+    #         UserID => $Self->{UserID},
+    #     );
+    # } else {
+    # Return all Services, filtering by KeepChildren config .
+    %Service = $ServiceObject->ServiceList(
+        UserID       => $Self->{UserID},
+        KeepChildren => $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Service::KeepChildren'),
+    );
+    # }
     return \%Service;
 }
 
