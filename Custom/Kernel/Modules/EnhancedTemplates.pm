@@ -205,6 +205,23 @@ sub Run {
                 'TreeView'     => 1,
                 'Max'          => 100,
             };
+
+            if ($StandardTemplate{SLA}) {
+                my $SLAs = $Self->_GetSLAs(
+                    Services  => $Services,
+                    ServiceID => $StandardTemplate{Service}
+                );
+
+                push @TemplateAJAX, {
+                    'Data'       => $SLAs,
+                    'SelectedID' => $StandardTemplate{SLA},
+                    'Name'       => 'SLAID',
+                    'Translation'  => 0,
+                    'PossibleNone' => 1,
+                    'TreeView'     => 0,
+                    'Max'          => 100,
+                }
+            }
         }
 
         if ($StandardTemplate{TicketType}) {
@@ -352,7 +369,6 @@ sub ReturnEmptyResponse {
         NoCache     => 1,
     );
 }
-
 
 sub _GetNextStates {
     my ($Self, %Param) = @_;
