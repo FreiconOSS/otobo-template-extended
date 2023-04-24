@@ -111,6 +111,10 @@ sub StandardTemplateAdd {
         }
     }
 
+    if ( IsArrayRefWithData($Param{RequiredGroup}) ) {
+        $Param{RequiredGroup} = join( ',', @{$Param{RequiredGroup}} );
+    }
+
     # get database object
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 

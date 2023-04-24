@@ -106,4 +106,19 @@
         </Value>
     </Setting>
 
+    <Setting Name="Loader::Module::AdminTemplateExtended###002-Ticket" Required="0" Valid="1">
+        <Description Translatable="1">Loader module registration for the agent interface.</Description>
+        <Navigation>Frontend::Admin::ModuleRegistration::Loader</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="JavaScript">
+                    <Array>
+                        <Item>Core.Agent.Admin.TemplateExtended.js</Item>
+                        <Item>Core.Agent.Admin.DynamicField.js</Item>
+                    </Array>
+                </Item>
+            </Hash>
+        </Value>
+    </Setting>
+
 </otobo_config>
