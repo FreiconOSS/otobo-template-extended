@@ -52,8 +52,6 @@ sub Run {
         my $OrigAction = $ParamObject->GetParam(Param => 'OrigAction') || "";
         my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
 
-        $EnhancedTemplateID = '3';
-
         unless (defined $EnhancedTemplateID) {
             ReturnEmptyResponse();
         }
