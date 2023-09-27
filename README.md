@@ -1,0 +1,1 @@
+# otobo-addon-template-extended
