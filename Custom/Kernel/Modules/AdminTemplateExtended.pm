@@ -675,7 +675,7 @@ sub Run {
                         OwnerID => $GetParam{NewUserID},
                     },
                     Autoselect      => $Autoselect,
-                    ACLPreselection => "",
+                    ACLPreselection => {},
                     LoopProtection  => \$LoopProtection,
                 );
 
