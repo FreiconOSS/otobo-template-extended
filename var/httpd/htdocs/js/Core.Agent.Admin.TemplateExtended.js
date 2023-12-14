@@ -46,6 +46,12 @@ Core.Agent.Admin.TemplateExtended = (function (TargetNS) {
             return false;
         });
 
+        $("#Filter").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#Templates tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
     };
 
     Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
