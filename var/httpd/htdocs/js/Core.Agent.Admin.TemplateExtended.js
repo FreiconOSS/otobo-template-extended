@@ -50,7 +50,7 @@ Core.Agent.Admin.TemplateExtended = (function (TargetNS) {
             var value = $(this).val().toLowerCase();
             var hasMatch = false;
 
-            $("#Templates tr").not("#NoTemplates").filter(function() {
+            $("#Templates tbody tr").not("#NoTemplates").filter(function() {
                 var match = $(this).text().toLowerCase().indexOf(value) > -1;
                 $(this).toggle(match);
                 if (match) hasMatch = true;
