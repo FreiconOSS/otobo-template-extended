@@ -48,9 +48,15 @@ Core.Agent.Admin.TemplateExtended = (function (TargetNS) {
 
         $("#Filter").on("keyup", function() {
             var value = $(this).val().toLowerCase();
-            $("#Templates tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            var hasMatch = false;
+
+            $("#Templates tr").not("#NoTemplates").filter(function() {
+                var match = $(this).text().toLowerCase().indexOf(value) > -1;
+                $(this).toggle(match);
+                if (match) hasMatch = true;
             });
+
+            $("#NoTemplates").toggle(!hasMatch);
         });
     };
 

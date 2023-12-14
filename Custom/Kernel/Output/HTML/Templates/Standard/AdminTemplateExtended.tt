@@ -99,7 +99,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="FilterMessage Hidden">
+                    <tr id="NoTemplates" class="FilterMessage Hidden">
                         <td colspan="7">[% Translate("No matches found.") | html %]</td>
                     </tr>
                     [% RenderBlockStart("NoDataFoundMsg") %]
