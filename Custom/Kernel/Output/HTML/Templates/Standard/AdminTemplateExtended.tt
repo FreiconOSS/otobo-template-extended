@@ -346,53 +346,53 @@
 
                 <p>[% Translate("You can use the following tags") | html %]:</p>
                 <dl>
-                    <dt><code>&lt;OTRS_OWNER_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_OWNER_*&gt;</code></dt>
                     <dd>
                         [% Translate("Ticket owner options") | html %] ([% Translate("e. g.") | html %]
-                        <code>&lt;OTRS_OWNER_UserFirstname&gt;</code>).
+                        <code>&lt;OTOBO_OWNER_UserFirstname&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_RESPONSIBLE_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_RESPONSIBLE_*&gt;</code></dt>
                     <dd>
                         [% Translate("Ticket responsible options") | html %] ([% Translate("e. g.") | html %]
-                        <code>&lt;OTRS_RESPONSIBLE_UserFirstname&gt;</code>).
+                        <code>&lt;OTOBO_RESPONSIBLE_UserFirstname&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_CURRENT_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_CURRENT_*&gt;</code></dt>
                     <dd>
                         [% Translate("Options of the current user who requested this action") | html %] ([% Translate("e. g.") | html %]
-                        <code>&lt;OTRS_CURRENT_UserFirstname&gt;</code>).
+                        <code>&lt;OTOBO_CURRENT_UserFirstname&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_TICKET_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_TICKET_*&gt;</code></dt>
                     <dd>
                         [% Translate("Options of the ticket data") | html %] ([% Translate("e. g.") | html %]
-                        <code>&lt;OTRS_TICKET_TicketNumber>, &lt;OTRS_TICKET_TicketID&gt;, &lt;OTRS_TICKET_Queue&gt;, &lt;OTRS_TICKET_State&gt;</code>).
+                        <code>&lt;OTOBO_TICKET_TicketNumber>, &lt;OTOBO_TICKET_TicketID&gt;, &lt;OTOBO_TICKET_Queue&gt;, &lt;OTOBO_TICKET_State&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_TICKET_DynamicField_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_TICKET_DynamicField_*&gt;</code></dt>
                     <dd>
                         [% Translate("Options of ticket dynamic fields internal key values") | html %]
-                        ([% Translate(" e. g.") | html %] <code>&lt;OTRS_TICKET_DynamicField_TestField&gt;,
-                            &lt;OTRS_TICKET_DynamicField_TicketFreeText1&gt;</code>).
+                        ([% Translate(" e. g.") | html %] <code>&lt;OTOBO_TICKET_DynamicField_TestField&gt;,
+                            &lt;OTOBO_TICKET_DynamicField_TicketFreeText1&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_TICKET_DynamicField_*_Value&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_TICKET_DynamicField_*_Value&gt;</code></dt>
                     <dd>
                         [% Translate("Options of ticket dynamic fields display values, useful for Dropdown and Multiselect fields") | html %]
-                        ([% Translate(" e. g.") | html %] <code>&lt;OTRS_TICKET_DynamicField_TestField_Value&gt;,
-                            &lt;OTRS_TICKET_DynamicField_TicketFreeText1_Value&gt;</code>).
+                        ([% Translate(" e. g.") | html %] <code>&lt;OTOBO_TICKET_DynamicField_TestField_Value&gt;,
+                            &lt;OTOBO_TICKET_DynamicField_TicketFreeText1_Value&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_CUSTOMER_DATA_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_CUSTOMER_DATA_*&gt;</code></dt>
                     <dd>
                         [% Translate("Options of the current customer user data") | html %] ([% Translate("e. g.") | html %]
-                        <code>&lt;OTRS_CUSTOMER_DATA_UserFirstname&gt;</code>).
+                        <code>&lt;OTOBO_CUSTOMER_DATA_UserFirstname&gt;</code>).
                     </dd>
 
-                    <dt><code>&lt;OTRS_CONFIG_*&gt;</code></dt>
+                    <dt><code>&lt;OTOBO_CONFIG_*&gt;</code></dt>
                     <dd>
-                        [% Translate("Config options") | html %] ([% Translate("e. g.") | html %] <code>&lt;OTRS_CONFIG_HttpType&gt;</code>).
+                        [% Translate("Config options") | html %] ([% Translate("e. g.") | html %] <code>&lt;OTOBO_CONFIG_HttpType&gt;</code>).
                     </dd>
                 </dl>
 
@@ -400,16 +400,16 @@
                 <p>
                     <strong>[% Translate("Note") | html %]:</strong>
                     [% Translate("Create type templates only supports this smart tags") | html %]:
-                    <code><strong> &lt;OTRS_CURRENT_*&gt;</strong></code> [% Translate("and") | html %] <code><strong> &lt;OTRS_CONFIG_*&gt;</strong></code>
+                    <code><strong> &lt;OTOBO_CURRENT_*&gt;</strong></code> [% Translate("and") | html %] <code><strong> &lt;OTOBO_CONFIG_*&gt;</strong></code>
                 </p>
 
                 <p class="SpacingTop">
                     [% Translate("Example template") | html %]:
                 </p>
                 <textarea rows="5" cols="60" name="Templatee">
-[% Translate("The current ticket state is") | html %]: "&lt;OTRS_TICKET_State&gt;"
+[% Translate("The current ticket state is") | html %]: "&lt;OTOBO_TICKET_State&gt;"
 
-[% Translate("Your email address is") | html %]: "&lt;OTRS_CUSTOMER_UserEmail&gt;"
+[% Translate("Your email address is") | html %]: "&lt;OTOBO_CUSTOMER_UserEmail&gt;"
                 </textarea>
             </div>
         </div>
