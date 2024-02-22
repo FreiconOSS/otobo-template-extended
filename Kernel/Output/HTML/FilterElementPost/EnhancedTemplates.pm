@@ -62,7 +62,7 @@ sub Run {
 
     my $StandardTemplateObjectExtended = $Kernel::OM->Get('Kernel::System::StandardTemplateExtended');
     my %StandardTemplates = $StandardTemplateObjectExtended->StandardTemplateList(
-        Valid => 0,
+        Valid => 1,
         Type  => 'Create',
     );
 
