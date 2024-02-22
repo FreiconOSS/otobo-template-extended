@@ -51,9 +51,9 @@ sub Run {
         my $FormID = $ParamObject->GetParam(Param => 'FormID') || "";
         my $OrigAction = $ParamObject->GetParam(Param => 'OrigAction') || "";
         my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
-
-        unless (defined $EnhancedTemplateID) {
-            ReturnEmptyResponse();
+        
+        if (!defined($EnhancedTemplateID) || $EnhancedTemplateID eq '') {
+            return ReturnEmptyResponse();
         }
 
         my %StandardTemplate = $StandardTemplateObject->StandardTemplateGet(
