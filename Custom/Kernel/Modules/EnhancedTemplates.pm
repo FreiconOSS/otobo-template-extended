@@ -43,6 +43,7 @@ sub Run {
     my $UploadCacheObject = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
     my $StandardTemplateObject = $Kernel::OM->Get('Kernel::System::StandardTemplateExtended');
+    my $TemplateGenerator = $Kernel::OM->Get('Kernel::System::TemplateGenerator');
 
     if ($Self->{Subaction} eq 'AJAXUpdate') {
 
@@ -60,6 +61,20 @@ sub Run {
             ID => $EnhancedTemplateID,
         );
 
+        # Replace tags for subject
+        my %Ticket;
+        $Ticket{CustomerUserID} = $CustomerUser;
+        my $Language //= $Kernel::OM->Get('Kernel::Config')->Get('DefaultLanguage') || 'en';
+        $StandardTemplate{Subject} = $TemplateGenerator->_Replace(
+            RichText   => 0,
+            Text       => $StandardTemplate{Subject} || '',
+            TicketData => \%Ticket,
+            Data       => $Param{Data} || {},
+            UserID     => $Self->{UserID},
+            Language   => $Language,
+            Template   => $StandardTemplate{TemplateType},
+        );
+        
         my @TemplateAJAX;
         my $FieldRestrictionsObject = $Kernel::OM->Get('Kernel::System::Ticket::FieldRestrictions');
         my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
