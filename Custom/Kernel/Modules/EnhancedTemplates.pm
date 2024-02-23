@@ -60,20 +60,6 @@ sub Run {
         my %StandardTemplate = $StandardTemplateObject->StandardTemplateGet(
             ID => $EnhancedTemplateID,
         );
-
-        # Replace tags for subject
-        my %Ticket;
-        $Ticket{CustomerUserID} = $CustomerUser;
-        my $Language //= $Kernel::OM->Get('Kernel::Config')->Get('DefaultLanguage') || 'en';
-        $StandardTemplate{Subject} = $TemplateGenerator->_Replace(
-            RichText   => 0,
-            Text       => $StandardTemplate{Subject} || '',
-            TicketData => \%Ticket,
-            Data       => $Param{Data} || {},
-            UserID     => $Self->{UserID},
-            Language   => $Language,
-            Template   => $StandardTemplate{TemplateType},
-        );
         
         my @TemplateAJAX;
         my $FieldRestrictionsObject = $Kernel::OM->Get('Kernel::System::Ticket::FieldRestrictions');
@@ -128,6 +114,20 @@ sub Run {
                 TemplateID     => $EnhancedTemplateID,
                 UserID         => $Self->{UserID},
                 CustomerUserID => $CustomerUser,
+            );
+
+            # Replace tags for subject
+            my %Ticket;
+            $Ticket{CustomerUserID} = $CustomerUser;
+            my $Language //= $Kernel::OM->Get('Kernel::Config')->Get('DefaultLanguage') || 'en';
+            $StandardTemplate{Subject} = $TemplateGenerator->_Replace(
+                RichText   => 0,
+                Text       => $StandardTemplate{Subject} || '',
+                TicketData => \%Ticket,
+                Data       => $Param{Data} || {},
+                UserID     => $Self->{UserID},
+                Language   => $Language,
+                Template   => $StandardTemplate{TemplateType},
             );
 
             # create StdAttachmentObject
