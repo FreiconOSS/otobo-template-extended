@@ -40,7 +40,7 @@ Core.Agent.EnhancedTemplates = (function (TargetNS) {
 
         $( "#EnhancedTemplateID" ).change(function() {
             // save original action, so we can later distinguish between the actions that made the ajax request
-            let origAction = $('input[name=Action]').val();
+            let origAction = $('#NewPhoneTicket input[name=Action]').val();
             $('#NewPhoneTicket').append('<input type="hidden"  id="OrigAction" name="OrigAction" value="' + origAction + '" />');
 
             // add AJAXAction Input field, with this we can use a custom action in Core.Ajax.Formupdate
