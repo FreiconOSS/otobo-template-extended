@@ -60,7 +60,7 @@ sub Run {
         my %StandardTemplate = $StandardTemplateObject->StandardTemplateGet(
             ID => $EnhancedTemplateID,
         );
-        
+
         my @TemplateAJAX;
         my $FieldRestrictionsObject = $Kernel::OM->Get('Kernel::System::Ticket::FieldRestrictions');
         my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
@@ -322,6 +322,11 @@ sub Run {
         for my $DynamicField (@{$Self->{DynamicField}}) {
             next if ($DynamicField->{FieldType} eq "Database");
             my $PossibleValues = $DynamicField->{Config}->{PossibleValues};
+
+            if ($DynamicField->{Config}->{PossibleNone} && $DynamicField->{Config}->{PossibleNone} == 1) {
+                $PossibleValues->{''} = '-';
+            }
+            
             if ($DynamicField->{FieldType} eq "FreiconWebServiceSingle") {
                 $PossibleValues = $DynamicFieldBackendObject->PossibleValuesGet(
                     DynamicFieldConfig   => $DynamicField,
@@ -332,6 +337,7 @@ sub Run {
             }
 
             next unless $PossibleValues;
+
             push @TemplateAJAX, {
                 'Data'       => $PossibleValues,
                 'SelectedID' => $StandardTemplate{"DynamicField_$DynamicField->{Name}"},
