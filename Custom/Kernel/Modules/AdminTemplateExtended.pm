@@ -297,20 +297,37 @@ sub Run {
             FieldFilter => \%FieldFilter || {},
         );
 
+        if (ref $Self->{DynamicField} eq 'ARRAY') {
+            my %DynamicFieldsHash;
+
+            for my $Element (@{$Self->{DynamicField}}) {
+                if (ref $Element eq 'HASH') {
+                    my $Name = $Element->{Name};
+                    $DynamicFieldsHash{$Name} = $Element;
+                }
+            }
+
+            $Self->{DynamicField} = \%DynamicFieldsHash;
+        }
+
         my %GetParam;
         my %DynamicFieldValues;
 
         my $Dest           = $ParamObject->GetParam( Param => 'Dest' ) || '';
         my $CustomerUser   = $ParamObject->GetParam( Param => 'SelectedCustomerUser' );
         my $ElementChanged = $ParamObject->GetParam( Param => 'ElementChanged' ) || '';
+        my $Subject = $ParamObject->GetParam( Param => 'Subject' ) || '';
+
         my $QueueID        = '';
         if ( $Dest =~ /^(\d{1,100})\|\|.+?$/ ) {
             $QueueID = $1;
         }
         $GetParam{Dest}    = $Dest;
         $GetParam{QueueID} = $QueueID;
+        $GetParam{ElementChanged} = $ElementChanged;
+        $GetParam{Subject} = $Subject;
 
-        # get list type
+            # get list type
         my $TreeView = 0;
         if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
             $TreeView = 1;
@@ -344,6 +361,7 @@ sub Run {
         my %DynFieldStates = (
             Visibility => {},
             Fields     => {},
+            Sets       => {},
         );
 
         ### FREICON: process extended template data
@@ -358,6 +376,7 @@ sub Run {
             if ( IsPositiveInteger( $GetParam{StandardTemplateID} ) ) {
 
                 %TemplateData = $Self->_StandardTemplateExtendedGet( ID => $GetParam{StandardTemplateID} );
+                
                 if ( %TemplateData ) {
 
                     if ( IsHashRefWithData($Config->{TemplateFieldsBehavior}) ) {
@@ -657,6 +676,17 @@ sub Run {
 
             # check dynamic fields
             my %CurFieldStates;
+            my $FormKey = '';
+            my @FormKeys = qw(Dest QueueID Subject ElementChanged);
+
+            for my $KeyWord (@FormKeys) {
+                if ($GetParam{$KeyWord}) {
+                    $FormKey .= $GetParam{$KeyWord};
+                }
+            }
+
+            $FormKey .= 'TemplateExtended';
+            
             if (%ChangedElements) {
 
                 # get values and visibility of dynamic fields
@@ -668,14 +698,14 @@ sub Run {
                     Action                    => $Self->{Action},
                     UserID                    => $Self->{UserID},
                     TicketID                  => $Self->{TicketID},
-                    FormID                    => $Self->{FormID},
+                    FormID                    => $FormKey,
                     CustomerUser              => $CustomerUser || '',
                     GetParam                  => {
                         %GetParam,
                         OwnerID => $GetParam{NewUserID},
                     },
                     Autoselect      => $Autoselect,
-                    ACLPreselection => {},
+                    ACLPreselection => $ACLPreselection,
                     LoopProtection  => \$LoopProtection,
                 );
 
@@ -713,30 +743,30 @@ sub Run {
 
         # cycle through the activated Dynamic Fields for this screen
         DYNAMICFIELD:
-        for my $Index ( sort keys %{ $DynFieldStates{Fields} } ) {
-            my $DynamicFieldConfig = $Self->{DynamicField}->[$Index];
-
-            my $DataValues = $DynFieldStates{Fields}{$Index}{NotACLReducible}
-                ? $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"}
-                :
-                (
-                    $DynamicFieldBackendObject->BuildSelectionDataGet(
-                        DynamicFieldConfig => $DynamicFieldConfig,
-                        PossibleValues     => $DynFieldStates{Fields}{$Index}{PossibleValues},
-                        Value              => $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"},
-                    )
-                        || $DynFieldStates{Fields}{$Index}{PossibleValues}
-                );
-
-            # add dynamic field to the list of fields to update
-            push @DynamicFieldAJAX, {
-                Name        => 'DynamicField_' . $DynamicFieldConfig->{Name},
-                Data        => $DataValues,
-                SelectedID  => $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"},
-                Translation => $DynamicFieldConfig->{Config}->{TranslatableValues} || 0,
-                Max         => 100,
-            };
-        }
+        # for my $Index ( sort keys %{ $DynFieldStates{Fields} } ) {
+        #     my $DynamicFieldConfig = $Self->{DynamicField}{$Index};
+        #
+        #     my $DataValues = $DynFieldStates{Fields}{$Index}{NotACLReducible}
+        #         ? $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"}
+        #         :
+        #         (
+        #             $DynamicFieldBackendObject->BuildSelectionDataGet(
+        #                 DynamicFieldConfig => $DynamicFieldConfig,
+        #                 PossibleValues     => $DynFieldStates{Fields}{$Index}{PossibleValues},
+        #                 Value              => $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"},
+        #             )
+        #                 || $DynFieldStates{Fields}{$Index}{PossibleValues}
+        #         );
+        #
+        #     # add dynamic field to the list of fields to update
+        #     push @DynamicFieldAJAX, {
+        #         Name        => 'DynamicField_' . $DynamicFieldConfig->{Name},
+        #         Data        => $DataValues,
+        #         SelectedID  => $GetParam{DynamicField}{"DynamicField_$DynamicFieldConfig->{Name}"},
+        #         Translation => $DynamicFieldConfig->{Config}->{TranslatableValues} || 0,
+        #         Max         => 100,
+        #     };
+        # }
 
         # define dynamic field visibility
         my %FieldVisibility;
@@ -890,6 +920,7 @@ sub Run {
                 @TemplateAJAX,
             ],
         );
+
         return $LayoutObject->Attachment(
             ContentType => 'application/json; charset=' . $LayoutObject->{Charset},
             Content     => $JSON,
@@ -908,6 +939,46 @@ sub Run {
 
         my @NewIDs = $ParamObject->GetArray( Param => 'IDs' );
         my ( %GetParam, %Errors );
+
+        ### FREICON
+
+        ### FREICON: add Dynamic Field Block
+        my $AllowedDynamicFields = $Kernel::OM->Get('Kernel::Config')->Get('StandardTemplateExtended::DynamicFields') || [];
+        my $DynamicFieldConfigList = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldListGet(
+            ResultType => 'HASH',
+            FieldFilter => { map { $_ => 1 } @{$AllowedDynamicFields} },
+        ) || [];
+        DYNAMICFIELD:
+        for my $DynamicFieldConfig ( @{$DynamicFieldConfigList} ) {
+            next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
+
+            # extract the dynamic field value form the web request
+            $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{ID} = $DynamicFieldConfig->{ID};
+
+            my $Type = $DynamicFieldConfig->{FieldType};
+            if ($Type eq 'Text') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueText => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } elsif ($Type eq 'Checkbox') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueText => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } elsif ($Type eq 'Dropdown') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueText => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } elsif ($Type eq 'Multiselect') {
+                my @MultiselectData;
+                for (@{$DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,)}) {
+                    push (@MultiselectData, {ValueText => $_});
+                }
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = \@MultiselectData;
+            } elsif ($Type eq 'TextArea') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueText => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } elsif ($Type eq 'Date') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueDateTime => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } elsif ($Type eq 'DateTime') {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueDateTime => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            } else {
+                $GetParam{'DynamicField_'.$DynamicFieldConfig->{Name}}{Value} = [{ValueText => $DynamicFieldBackendObject->EditFieldValueGet(DynamicFieldConfig => $DynamicFieldConfig,ParamObject => $ParamObject,LayoutObject => $LayoutObject,),}];
+            }
+        }
+        ### FREICON
 
         for my $Parameter (qw(ID Name Comment ValidID TemplateType RequiredGroup TicketType Queue Service Owner SLA Subject Priority NextState Responsible ProcessEntityID)) {
             $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter ) || '';

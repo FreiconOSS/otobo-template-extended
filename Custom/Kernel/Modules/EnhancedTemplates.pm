@@ -75,20 +75,6 @@ sub Run {
             FieldFilter => $Config->{DynamicField} || {},
         );
 
-        my %States = $FieldRestrictionsObject->GetFieldStates(
-            TicketObject              => $TicketObject,
-            DynamicFields             => $Self->{DynamicField},
-            DynamicFieldBackendObject => $DynamicFieldBackendObject,
-            ChangedElements           => {},
-            CustomerUser              => $CustomerUser,
-            Action                    => $OrigAction,
-            UserID                    => $Self->{UserID},
-            TicketID                  => $Self->{TicketID},
-            FormID                    => $FormID,
-            GetParam                  => { %GetParam },
-            LoopProtection            => \$LoopProtection,
-        );
-
         # update ticket body and attachements if needed.
         my @TicketAttachments;
         my $TemplateText;
@@ -319,7 +305,9 @@ sub Run {
             };
         }
 
+
         for my $DynamicField (@{$Self->{DynamicField}}) {
+            
             next if ($DynamicField->{FieldType} eq "Database");
             my $PossibleValues = $DynamicField->{Config}->{PossibleValues};
 
@@ -347,8 +335,6 @@ sub Run {
 
         my $JSON = $LayoutObject->BuildSelectionJSON(
             [
-                #@StdFieldAJAX                    ,
-                #@DynamicFieldAJAX    ,
                 @TemplateAJAX,
             ],
         );
