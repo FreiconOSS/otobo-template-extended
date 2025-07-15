@@ -283,6 +283,19 @@ sub Run {
             };
         }
 
+        if ($StandardTemplate{Responsible}) {
+            my $NewUsers = $Self->_GetUsers(
+                QueueID  => $StandardTemplate{Queue},
+                OwnerAll => 1
+            );
+
+            push @TemplateAJAX, {
+                'Data'       => $NewUsers,
+                'SelectedID' => $StandardTemplate{Responsible},
+                'Name'       => 'NewResponsibleID',
+            };
+        }
+
         if ($StandardTemplate{Priority}) {
             my $Priorities = $Self->_GetPriorities(
                 QueueID => $StandardTemplate{Queue},

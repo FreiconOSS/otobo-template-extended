@@ -122,12 +122,12 @@ sub StandardTemplateAdd {
     return if !$DBObject->Do(
         SQL => '
             INSERT INTO standard_template_extended (standard_template_id, queue_id, ticket_type_id, service_id, sla_id,
-                user_id, subject, ticket_state_id, ticket_priority_id, process_entity_id, required_group)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                user_id, subject, ticket_state_id, ticket_priority_id, process_entity_id, required_group, responsible_user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         Bind => [
             \$ID,        \$Param{Queue}, \$Param{TicketType}, \$Param{Service},
             \$Param{SLA}, \$Param{Owner},  \$Param{Subject},  \$Param{NextState},
-            \$Param{Priority}, \$Param{ProcessEntityID}, \$Param{RequiredGroup}
+            \$Param{Priority}, \$Param{ProcessEntityID}, \$Param{RequiredGroup}, \$Param{Responsible}
         ],
     );
 
@@ -201,7 +201,7 @@ sub StandardTemplateGet {
             SELECT name, valid_id, comments, text, content_type, create_time, create_by,
                 change_time, change_by, template_type,
                 subject, ticket_type_id, sla_id, queue_id, service_id, user_id, ticket_priority_id, ticket_state_id, process_entity_id,
-                required_group
+                required_group, responsible_user_id
             FROM standard_template
             LEFT JOIN standard_template_extended
                 ON standard_template.id = standard_template_extended.standard_template_id
@@ -212,17 +212,17 @@ sub StandardTemplateGet {
     my %Data;
     while ( my @Data = $DBObject->FetchrowArray() ) {
         %Data = (
-            ID           => $Param{ID},
-            Name         => $Data[0],
-            Comment      => $Data[2],
-            Template     => $Data[3],
-            ContentType  => $Data[4] || 'text/plain',
-            ValidID      => $Data[1],
-            CreateTime   => $Data[5],
-            CreateBy     => $Data[6],
-            ChangeTime   => $Data[7],
-            ChangeBy     => $Data[8],
-            TemplateType => $Data[9],
+            ID              => $Param{ID},
+            Name            => $Data[0],
+            Comment         => $Data[2],
+            Template        => $Data[3],
+            ContentType     => $Data[4] || 'text/plain',
+            ValidID         => $Data[1],
+            CreateTime      => $Data[5],
+            CreateBy        => $Data[6],
+            ChangeTime      => $Data[7],
+            ChangeBy        => $Data[8],
+            TemplateType    => $Data[9],
 
             Subject         => $Data[10],
             TicketType      => $Data[11],
@@ -234,7 +234,8 @@ sub StandardTemplateGet {
             NextState       => $Data[17],
             ProcessEntityID => $Data[18],
 
-            RequiredGroup => $Data[19],
+            RequiredGroup   => $Data[19],
+            Responsible     => $Data[20],
         );
     }
 
@@ -299,12 +300,12 @@ sub StandardTemplateUpdate {
     return if !$Kernel::OM->Get('Kernel::System::DB')->Do(
         SQL => '
             INSERT INTO standard_template_extended (standard_template_id, queue_id, ticket_type_id, service_id, sla_id,
-                user_id, subject, ticket_state_id, ticket_priority_id, process_entity_id, required_group)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                user_id, subject, ticket_state_id, ticket_priority_id, process_entity_id, required_group, responsible_user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         Bind => [
             \$Param{ID},        \$Param{Queue}, \$Param{TicketType}, \$Param{Service},
             \$Param{SLA}, \$Param{Owner},  \$Param{Subject},  \$Param{NextState},
-            \$Param{Priority}, \$Param{ProcessEntityID}, \$Param{RequiredGroup}
+            \$Param{Priority}, \$Param{ProcessEntityID}, \$Param{RequiredGroup}, \$Param{Responsible}
         ],
     );
 
@@ -744,47 +745,48 @@ sub _AllValuesDelete {
     return 1;
 }
 
-=item ValueValidate()
+=head2 ValueValidate()
 
 checks if the given value is valid for the value type.
 
-    my $Success = $DynamicFieldValueObject->ValueValidate(
-        Value    =>  {
-                ValueText          => 'some text',            # optional, one of these fields must be provided
-                ValueDateTime      => '1977-12-12 12:00:00',  # optional
-                ValueInt           => 123,                    # optional
-            },
-        UserID   => $UserID,
-    );
+    my $IsValid = $DynamicFieldValueObject->ValueValidate(
+    Value  =>  {
+        ValueText          => 'some text',            # optional, one of these fields must be provided
+        ValueDateTime      => '1977-12-12 12:00:00',  # optional
+        ValueInt           => 123,                    # optional
+    },
+    UserID => $UserID,
+);
 
 =cut
 
 sub _ValueValidate {
     my ( $Self, %Param ) = @_;
 
-    return if !IsHashRefWithData( $Param{Value} );
+    return unless IsHashRefWithData( $Param{Value} );
 
-    my %Value = %{ $Param{Value} };
+    my %Value = $Param{Value}->%*;
 
     # validate date
     if ( $Value{ValueDateTime} ) {
 
+        # get time object
+        my $DateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
+
         # convert the DateTime value to system time to check errors
-        my $SystemTime = $Kernel::OM->Get('Kernel::System::Time')->TimeStamp2SystemTime(
+        my $SystemTime = $DateTimeObject->Set(
             String => $Value{ValueDateTime},
         );
 
-        return if !defined $SystemTime;
+        return unless defined $SystemTime;
 
         # convert back to time stamp to check errors
-        my $TimeStamp = $Kernel::OM->Get('Kernel::System::Time')->SystemTime2TimeStamp(
-            SystemTime => $SystemTime,
-        );
+        my $TimeStamp = $DateTimeObject->ToString;
 
-        return if !$TimeStamp;
+        return unless $TimeStamp;
 
         # compare if the date is the same
-        return if !( $Value{ValueDateTime} eq $TimeStamp )
+        return unless $Value{ValueDateTime} eq $TimeStamp;
     }
 
     # validate integer
@@ -800,8 +802,12 @@ sub _ValueValidate {
         }
     }
 
+    # no validation for ValueText
+
+    # report as valid when no check found a reason to complain
     return 1;
 }
+
 
 
 sub _DeleteFromCache {

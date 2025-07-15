@@ -238,11 +238,11 @@
                                 </div>
                                 <div class="Clear"></div>
 
-#                                    <label for="Responsible">[% Translate("Responsible") | html %]:</label>
-#                                    <div class="Field">
-#                                        [% Data.ResponsibleString %]
-#                                    </div>
-#                                    <div class="Clear"></div>
+                                <label for="Responsible">[% Translate("Responsible") | html %]:</label>
+                                <div class="Field">
+                                    [% Data.ResponsibleString %]
+                                </div>
+                                <div class="Clear"></div>
 
                                 <label for="Subject">[% Translate("Subject") | html %]:</label>
                                 <div class="Field">
