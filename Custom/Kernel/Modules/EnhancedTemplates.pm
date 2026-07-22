@@ -319,25 +319,52 @@ sub Run {
         }
 
 
+        # form context after the template is applied - used to fetch webservice
+        # values and to evaluate ACLs against the NEW form state instead of the
+        # outdated request parameters
+        my %TemplateFormData = (
+            ServiceID  => $StandardTemplate{Service} // '',
+            QueueID    => $StandardTemplate{Queue} // '',
+            TypeID     => $StandardTemplate{TicketType} // '',
+            SLAID      => $StandardTemplate{SLA} // '',
+            PriorityID => $StandardTemplate{Priority} // '',
+        );
+
         for my $DynamicField (@{$Self->{DynamicField}}) {
-            
+
             next if ($DynamicField->{FieldType} eq "Database");
             my $PossibleValues = $DynamicField->{Config}->{PossibleValues};
 
             if ($DynamicField->{Config}->{PossibleNone} && $DynamicField->{Config}->{PossibleNone} == 1) {
                 $PossibleValues->{''} = '-';
             }
-            
-            if ($DynamicField->{FieldType} eq "FreiconWebServiceSingle") {
+
+            if ($DynamicField->{FieldType} =~ m/^FreiconWebService/) {
                 $PossibleValues = $DynamicFieldBackendObject->PossibleValuesGet(
                     DynamicFieldConfig   => $DynamicField,
                     OverridePossibleNone => 0,
-                    Service              => $StandardTemplate{Service}
+                    FormData             => { %TemplateFormData },
                 );
                 next if ($PossibleValues->{"FieldLabel_1"});
             }
 
             next unless $PossibleValues;
+
+            # apply ACLs with the new form state, analogous to FieldRestrictions
+            my %AclData = map { $_ => $_ } keys %{$PossibleValues};
+            my $ACL = $TicketObject->TicketAcl(
+                %TemplateFormData,
+                CustomerUserID => $CustomerUser || '',
+                Action         => $OrigAction || $Self->{Action},
+                ReturnType     => 'Ticket',
+                ReturnSubType  => 'DynamicField_' . $DynamicField->{Name},
+                Data           => \%AclData,
+                UserID         => $Self->{UserID},
+            );
+            if ($ACL) {
+                my %Filter = $TicketObject->TicketAclData();
+                $PossibleValues = { map { $_ => $PossibleValues->{$_} } keys %Filter };
+            }
 
             push @TemplateAJAX, {
                 'Data'       => $PossibleValues,
