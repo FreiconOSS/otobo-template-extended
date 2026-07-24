@@ -333,17 +333,22 @@ sub Run {
         for my $DynamicField (@{$Self->{DynamicField}}) {
 
             next if ($DynamicField->{FieldType} eq "Database");
-            my $PossibleValues = $DynamicField->{Config}->{PossibleValues};
 
-            if ($DynamicField->{Config}->{PossibleNone} && $DynamicField->{Config}->{PossibleNone} == 1) {
-                $PossibleValues->{''} = '-';
-            }
+            # work on a copy - never modify the cached field config
+            my $PossibleValues = $DynamicField->{Config}->{PossibleValues}
+                ? { %{ $DynamicField->{Config}->{PossibleValues} } }
+                : undef;
 
             if ($DynamicField->{FieldType} =~ m/^FreiconWebService/) {
+
+                # do NOT override PossibleNone here - the field config decides
+                # whether an empty option exists, exactly as on the initial
+                # form render; overriding it removed the empty option and the
+                # browser auto-selected the first webservice value even when
+                # the template does not set this field
                 $PossibleValues = $DynamicFieldBackendObject->PossibleValuesGet(
-                    DynamicFieldConfig   => $DynamicField,
-                    OverridePossibleNone => 0,
-                    FormData             => { %TemplateFormData },
+                    DynamicFieldConfig => $DynamicField,
+                    FormData           => { %TemplateFormData },
                 );
                 next if ($PossibleValues->{"FieldLabel_1"});
             }
@@ -364,6 +369,13 @@ sub Run {
             if ($ACL) {
                 my %Filter = $TicketObject->TicketAclData();
                 $PossibleValues = { map { $_ => $PossibleValues->{$_} } keys %Filter };
+            }
+
+            # (re-)add the empty option AFTER ACL filtering - ACL value lists
+            # contain concrete values only and would strip it, which forces
+            # the browser to auto-select the first remaining value
+            if ($DynamicField->{Config}->{PossibleNone}) {
+                $PossibleValues->{''} = '-';
             }
 
             push @TemplateAJAX, {
